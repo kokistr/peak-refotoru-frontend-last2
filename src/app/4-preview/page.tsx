@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useImageContext } from '@/lib/image-context';
+import { apiClient } from '@/lib/api-client'; // APIクライアントのインポート
 
 export default function PreviewPage() {
   // State declarations
@@ -57,28 +58,15 @@ export default function PreviewPage() {
             maskId: categoryImageMeta.mask_id 
           });
           
-          // Before画像の取得 - IDはそのまま使用（拡張子を含む）
-          const beforeRes = await fetch(`http://localhost:8000/api/preview/before/${encodeURIComponent(uploadedImageMeta.id)}`);
-          
-          if (!beforeRes.ok) {
-            const errorData = await beforeRes.json().catch(() => ({ detail: '不明なエラー' }));
-            throw new Error(`Before画像の取得に失敗しました: ${errorData.detail || beforeRes.statusText}`);
-          }
-          
-          const beforeData = await beforeRes.json();
+          // Before画像の取得 - APIクライアントを使用
+          const beforeData = await apiClient.getBeforeImage(uploadedImageMeta.id);
           setBeforeImage(beforeData.blob_url);
           
-          // After画像の取得 - IDはそのまま使用（拡張子を含む）
-          const afterRes = await fetch(
-            `http://localhost:8000/api/preview/after/${encodeURIComponent(uploadedImageMeta.id)}/${encodeURIComponent(categoryImageMeta.mask_id)}`
+          // After画像の取得 - APIクライアントを使用
+          const afterData = await apiClient.getAfterImage(
+            uploadedImageMeta.id,
+            categoryImageMeta.mask_id
           );
-          
-          if (!afterRes.ok) {
-            const errorData = await afterRes.json().catch(() => ({ detail: '不明なエラー' }));
-            throw new Error(`After画像の取得に失敗しました: ${errorData.detail || afterRes.statusText}`);
-          }
-          
-          const afterData = await afterRes.json();
           setAfterImage(afterData.public_url);
         } else {
           // コンテキストから画像を使用
@@ -88,8 +76,7 @@ export default function PreviewPage() {
         }
       } catch (err) {
         console.error('画像取得エラー:', err);
-        //setError(err.message || '画像の取得中にエラーが発生しました');  4/23羽田野修正
-
+        
         setError(
           err instanceof Error 
             ? err.message 
@@ -159,22 +146,6 @@ export default function PreviewPage() {
   const handleImageClick = () => {
     setShowImagePopup(true);
   };
-
-  // 画像URLを取得する関数（サーバーホスト名を付与）0422
-  const getImageUrl = (path: string | null) => {
-    if (!path) return '';
-    
-    // 既にhttp://やhttps://で始まる完全URLの場合はそのまま返す
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return path;
-    }
-    
-    // 相対パスの場合は、ベースURLを付与（ローカル開発ではhttp://localhost:8000）
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    return `http://localhost:8000${normalizedPath}`;
-  };
-
-  
 
   return (
     <div className="min-h-screen bg-[#fff9f0]">
@@ -308,7 +279,7 @@ export default function PreviewPage() {
                 // Before画像
                 beforeImage ? (
                   <Image
-                    src={getImageUrl(beforeImage)}
+                    src={apiClient.getImageUrl(beforeImage)}
                     alt="Before Image"
                     width={0}
                     height={0}
@@ -327,7 +298,7 @@ export default function PreviewPage() {
                 // After画像
                 afterImage ? (
                   <Image
-                    src={getImageUrl(afterImage)}
+                    src={apiClient.getImageUrl(afterImage)}
                     alt="After Image"
                     width={0}
                     height={0}
@@ -476,7 +447,7 @@ export default function PreviewPage() {
                 {activeTab === 'before' ? (
                   beforeImage ? (
                     <Image
-                      src={getImageUrl(beforeImage)}
+                      src={apiClient.getImageUrl(beforeImage)}
                       alt="Before Image"
                       width={1200}
                       height={900}
@@ -490,7 +461,7 @@ export default function PreviewPage() {
                 ) : (
                   afterImage ? (
                     <Image
-                      src={getImageUrl(afterImage)}
+                      src={apiClient.getImageUrl(afterImage)}
                       alt="After Image"
                       width={1200}
                       height={900}
