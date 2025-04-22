@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useImageContext } from '../../lib/image-context';
-import { apiClient } from '../../lib/api-client'; // 追加
 
 export default function UploadPage() {
   const router = useRouter();
@@ -15,7 +14,7 @@ export default function UploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   // ファイルの先頭部分で logoError 状態を追加
-  const [logoError, setLogoError] = useState(false);
+const [logoError, setLogoError] = useState(false);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -53,8 +52,20 @@ export default function UploadPage() {
     
     // 画像のアップロード処理を追加
     try {
-      // apiClientを使用
-      const data = await apiClient.uploadImage(selectedFile);
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      
+      // FastAPIエンドポイントにアップロード
+      const response = await fetch('https://tech0-gen-8-step4-peak-back-gxcchbcwfaxguem.canadacentral-01.azurewebsites.net/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('画像のアップロードに失敗しました');
+      }
+      
+      const data = await response.json();
       console.log('アップロード成功:', data);
       
       // アップロードされた画像のIDをコンテキストに保存
