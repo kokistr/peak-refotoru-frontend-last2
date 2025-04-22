@@ -1,12 +1,39 @@
-// src/lib/api-client.ts
+/**
+ * API クライアント
+ * バックエンドAPIとの通信を一元管理するためのモジュール
+ */
 
-// バックエンドAPIのベースURL
-// 環境変数があれば使用し、なければAzureのURLを直接指定
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tech0-gen-8-step4-peak-back-gxcthbcwafaxujern.canadacentral-01.azurewebsites.net';
+// 環境変数またはデフォルト値からAPIのベースURLを取得
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://your-azure-backend-url.azurewebsites.net';
 
-// APIリクエスト関数
+/**
+ * 画像URLを取得する
+ * サーバーホスト名を付与する
+ * @param path - 画像のパス
+ * @returns 完全なURL
+ */
+const getImageUrl = (path: string | null) => {
+  if (!path) return '';
+  
+  // 既にhttp://やhttps://で始まる完全URLの場合はそのまま返す
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  
+  // 相対パスの場合は、ベースURLを付与
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE_URL}${normalizedPath}`;
+};
+
+/**
+ * APIクライアントオブジェクト
+ */
 export const apiClient = {
-  // 画像アップロード
+  /**
+   * 画像のアップロード
+   * @param file - アップロードするファイル
+   * @returns アップロード結果のレスポンス
+   */
   async uploadImage(file: File) {
     const formData = new FormData();
     formData.append('file', file);
@@ -17,83 +44,111 @@ export const apiClient = {
     });
 
     if (!response.ok) {
-      throw new Error(`アップロードエラー: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ detail: '不明なエラー' }));
+      throw new Error(`画像のアップロードに失敗しました: ${errorData.detail || response.statusText}`);
     }
 
     return await response.json();
   },
 
-  // マスク処理
+  /**
+   * マスク処理
+   * @param imageId - 画像ID
+   * @param maskData - マスクデータ
+   * @returns 処理結果
+   */
   async processMask(imageId: string, maskData: string) {
     const response = await fetch(`${API_BASE_URL}/api/process`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        image_id: imageId,
-        mask_data: maskData,
-      }),
+      body: JSON.stringify({ imageId, maskData }),
     });
 
     if (!response.ok) {
-      throw new Error(`マスク処理エラー: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ detail: '不明なエラー' }));
+      throw new Error(`マスク処理に失敗しました: ${errorData.detail || response.statusText}`);
     }
 
     return await response.json();
   },
 
-  // 素材適用
+  /**
+   * 素材適用
+   * @param imageId - 画像ID
+   * @param maskId - マスクID
+   * @param materialId - 素材ID
+   * @returns 処理結果
+   */
   async applyMaterial(imageId: string, maskId: string, materialId: string) {
     const response = await fetch(`${API_BASE_URL}/api/apply-material`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        image_id: imageId,
-        mask_id: maskId,
-        material_id: materialId,
-      }),
+      body: JSON.stringify({ imageId, maskId, materialId }),
     });
 
     if (!response.ok) {
-      throw new Error(`素材適用エラー: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ detail: '不明なエラー' }));
+      throw new Error(`素材適用に失敗しました: ${errorData.detail || response.statusText}`);
     }
 
     return await response.json();
   },
 
-  // カテゴリ別の素材一覧を取得
+  /**
+   * 素材一覧取得
+   * @param category - カテゴリ
+   * @returns 素材一覧
+   */
   async getMaterials(category: string) {
     const response = await fetch(`${API_BASE_URL}/api/materials/${category}`);
-    
+
     if (!response.ok) {
-      throw new Error(`素材取得エラー: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ detail: '不明なエラー' }));
+      throw new Error(`素材一覧の取得に失敗しました: ${errorData.detail || response.statusText}`);
     }
-    
+
     return await response.json();
   },
 
-  // 元画像（Before）を取得
+  /**
+   * Before画像の取得
+   * @param imageId - 画像ID
+   * @returns Before画像情報
+   */
   async getBeforeImage(imageId: string) {
-    const response = await fetch(`${API_BASE_URL}/api/preview/before/${imageId}`);
-    
+    const response = await fetch(`${API_BASE_URL}/api/preview/before/${encodeURIComponent(imageId)}`);
+
     if (!response.ok) {
-      throw new Error(`Before画像取得エラー: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ detail: '不明なエラー' }));
+      throw new Error(`Before画像の取得に失敗しました: ${errorData.detail || response.statusText}`);
     }
-    
+
     return await response.json();
   },
 
-  // 結果画像（After）を取得
+  /**
+   * After画像の取得
+   * @param imageId - 画像ID
+   * @param maskId - マスクID
+   * @returns After画像情報
+   */
   async getAfterImage(imageId: string, maskId: string) {
-    const response = await fetch(`${API_BASE_URL}/api/preview/after/${imageId}/${maskId}`);
-    
+    const response = await fetch(
+      `${API_BASE_URL}/api/preview/after/${encodeURIComponent(imageId)}/${encodeURIComponent(maskId)}`
+    );
+
     if (!response.ok) {
-      throw new Error(`After画像取得エラー: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ detail: '不明なエラー' }));
+      throw new Error(`After画像の取得に失敗しました: ${errorData.detail || response.statusText}`);
     }
-    
+
     return await response.json();
-  }
+  },
+
+  // 画像URLを取得する関数をオブジェクトのメソッドとして追加
+  getImageUrl
 };
