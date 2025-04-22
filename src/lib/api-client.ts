@@ -13,6 +13,8 @@ export const apiClient = {
     const response = await fetch(`${API_BASE_URL}/upload`, {
       method: 'POST',
       body: formData,
+      credentials: 'include', // クレデンシャルを含める
+      mode: 'cors',           // CORSモードを明示的に指定
     });
     if (!response.ok) {
       throw new Error(`アップロードエラー: ${response.statusText}`);
