@@ -88,7 +88,13 @@ export default function PreviewPage() {
         }
       } catch (err) {
         console.error('画像取得エラー:', err);
-        setError(err.message || '画像の取得中にエラーが発生しました');
+        //setError(err.message || '画像の取得中にエラーが発生しました');  4/23羽田野修正
+
+        setError(
+          err instanceof Error 
+            ? err.message 
+            : '画像の取得中にエラーが発生しました'
+        );
         
         // エラー時はコンテキストの画像にフォールバック
         setBeforeImage(uploadedImage);
