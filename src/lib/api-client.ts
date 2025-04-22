@@ -1,7 +1,8 @@
 // src/lib/api-client.ts
 // バックエンドAPIのベースURL
 // 環境変数があれば使用し、なければAzureのURLを直接指定
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tech0-gen-8-step4-peak-back-gxcthbcwafaxujern.canadacentral-01.azurewebsites.net';
+//const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tech0-gen-8-step4-peak-back-gxcthbcwafaxujern.canadacentral-01.azurewebsites.net';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net';
 
 // APIリクエスト関数
 export const apiClient = {
