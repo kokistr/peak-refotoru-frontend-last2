@@ -51,12 +51,6 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
       
-      # Azure ログインを追加
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -64,3 +58,4 @@ jobs:
           app-name: 'aps-pikuhan-front-1'
           slot-name: 'Production'
           package: ./deploy
+          publish-profile: ${{ secrets.AZURE_CREDENTIALS }}
