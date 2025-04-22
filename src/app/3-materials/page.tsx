@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { useImageContext } from '@/lib/image-context';
 import { useRouter } from 'next/navigation';
+import { apiClient } from '@/lib/api-client'; // 追加
 
 // MaterialsContent コンポーネント
 function MaterialsContent() {  
@@ -96,16 +97,7 @@ function MaterialsContent() {
       console.log(`素材取得を開始: カテゴリ=${categoryParam}`);
       
       try {
-        const response = await fetch(`http://localhost:8000/api/materials/${encodedCategory}`);
-        console.log(`APIレスポンスステータス: ${response.status}`);
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`素材取得エラー: ${errorText}`);
-          throw new Error(`素材の取得に失敗しました: ${response.status}`);
-        }
-        
-        const data = await response.json();
+        const data = await apiClient.getMaterials(encodedCategory);
         console.log(`取得した素材データ: ${JSON.stringify(data)}`);
         console.log(`素材数: ${data.materials ? data.materials.length : 0}`);
         setMaterialItems(data.materials);
@@ -140,7 +132,8 @@ function MaterialsContent() {
     }
     
     // 相対パスの場合はベースURLを追加
-    return `http://localhost:8000${imageUrl}`;
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tech0-gen-8-step4-peak-back-gxcthbcwafaxujern.canadacentral-01.azurewebsites.net';
+    return `${API_BASE_URL}${imageUrl}`;
   };
 
 
@@ -149,58 +142,6 @@ function MaterialsContent() {
     const img = e.currentTarget;
     setImageHeight(img.clientHeight);
   };
-
-  // // カテゴリー別の素材データ（実際の実装ではAPIから取得するので変更！）
-  // const materials = {
-  //   壁: [
-  //     { id: 1, name: 'ホワイトペイント', color: '白色' },
-  //     { id: 2, name: 'ベージュクロス', color: 'ベージュ' },
-  //     { id: 3, name: 'グレーペイント', color: 'グレー' },
-  //     { id: 4, name: 'ブルーペイント', color: '青色' },
-  //     { id: 5, name: 'グリーンペイント', color: '緑色' },
-  //     { id: 6, name: 'イエローペイント', color: '黄色' },
-  //     { id: 7, name: 'ピンククロス', color: 'ピンク' },
-  //     { id: 8, name: '木目調クロス', color: '茶色' },
-  //     { id: 9, name: 'モルタル調', color: 'グレー' },
-  //   ],
-  //   床: [
-  //     {
-  //       id: 1,
-  //       name: 'オーク柄フローリング',
-  //       color: 'ベージュ',
-  //       image: '/images/FL-MD-BE-016.jpg',
-  //     },
-  //     {
-  //       id: 2,
-  //       name: '大理石調ブラックフローリング',
-  //       color: '黒色',
-  //       image: '/images/FL-MD-BKM-013.jpg',
-  //     },
-  //     {
-  //       id: 3,
-  //       name: 'グレーアッシュ柄フローリング',
-  //       color: 'グレー',
-  //       image: '/images/FL-CR-WH-011.jpg',
-  //     },
-  //     { id: 4, name: 'バーチ', color: '明るい茶色' },
-  //     { id: 5, name: 'メープル', color: '黄茶色' },
-  //     { id: 6, name: '竹フローリング', color: '薄黄色' },
-  //     { id: 7, name: 'コルク', color: '茶色' },
-  //     { id: 8, name: 'タイル', color: 'グレー' },
-  //     { id: 9, name: 'カーペット', color: 'ベージュ' },
-  //   ],
-  //   ドア: [
-  //     { id: 1, name: 'ホワイトドア', color: '白色' },
-  //     { id: 2, name: 'ナチュラルウッド', color: '薄茶色' },
-  //     { id: 3, name: 'ダークウッド', color: '濃茶色' },
-  //     { id: 4, name: 'ガラスドア', color: '透明' },
-  //     { id: 5, name: 'フロストガラス', color: '半透明' },
-  //     { id: 6, name: '黒塗装ドア', color: '黒色' },
-  //     { id: 7, name: 'グレードア', color: 'グレー' },
-  //     { id: 8, name: 'ブルードア', color: '青色' },
-  //     { id: 9, name: 'グリーンドア', color: '緑色' },
-  //   ],
-  // };
 
   // 安全にアクセスするためのヘルパー関数
   const getMaterialsForCategory = () => {
@@ -247,32 +188,19 @@ function MaterialsContent() {
         material_id: id
       });
       
-      const response = await fetch('http://localhost:8000/api/apply-material', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          image_id: uploadedImageMeta.id,
-          mask_id: categoryImageMeta.mask_id,
-          material_id: id
-        }),
-      });
+      const data = await apiClient.applyMaterial(
+        uploadedImageMeta.id,
+        categoryImageMeta.mask_id,
+        id
+      );
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('APIエラーレスポンス:', errorText);
-        throw new Error('素材適用に失敗しました');
-      }
-      
-      const data = await response.json();
       console.log('素材適用成功:', data);
       
       // APIから返された合成画像URLを使って表示を更新
       // ※ここが重要0422
       if (data.public_url) {
         // 合成画像のURLを使用して表示を更新
-        const fullImageUrl = `http://localhost:8000${data.public_url}`;
+        const fullImageUrl = getFullImageUrl(data.public_url);
         setCategoryImage(fullImageUrl, categoryImageMeta);
       }
       
@@ -736,6 +664,44 @@ function MaterialsContent() {
             padding: 2px;
             line-height: 1.2;
           }
+        }
+
+        /* 左から右へ色反転するボタン */
+        .flip-button-lr {
+          position: relative;
+          background-color: #f87e42;
+          color: white;
+          border-radius: 0.5rem;
+          font-weight: 500;
+          border: 2px solid #f87e42;
+          overflow: hidden;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: color 0.3s ease;
+        }
+
+        .flip-button-lr::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background-color: white;
+          transition: left 0.3s ease;
+          z-index: -1;
+        }
+
+        .flip-button-lr:hover,
+        .flip-button-lr:active {
+          color: #f87e42;
+        }
+
+        .flip-button-lr:hover::before,
+        .flip-button-lr:active::before {
+          left: 0;
         }
       `}</style>
             {/* フッターをインラインで追加 */}
