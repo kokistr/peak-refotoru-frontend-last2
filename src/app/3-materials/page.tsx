@@ -14,7 +14,7 @@ function MaterialsContent() {
 
   const [selectedCategory, setSelectedCategory] = useState('壁');
   const [currentPage, setCurrentPage] = useState(0);
-  const [selectedMaterial, setSelectedMaterial] = useState<number | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
   const [showMaterialInfo, setShowMaterialInfo] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [touchStartX, setTouchStartX] = useState(0);
