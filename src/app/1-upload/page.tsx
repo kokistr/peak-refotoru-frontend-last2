@@ -56,7 +56,7 @@ const [logoError, setLogoError] = useState(false);
       formData.append('file', selectedFile);
       
       // FastAPIエンドポイントにアップロード
-      const response = await fetch('https://tech0-gen-8-step4-peak-back-gxcchbcwfaxguem.canadacentral-01.azurewebsites.net/upload', {
+      const response = await fetch('https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net/upload', {
         method: 'POST',
         body: formData,
       });
