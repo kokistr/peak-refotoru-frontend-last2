@@ -28,8 +28,8 @@ interface MaterialItemProps {
   isMobile: boolean;
 }
 
-// 素材アイテムコンポーネント
-const MaterialItem: React.FC<MaterialItemProps> = ({ 
+// 素材アイテムコンポーネント - アロー関数構文を使用
+const MaterialItem = ({ 
   material, 
   isSelected, 
   onClick, 
@@ -37,7 +37,7 @@ const MaterialItem: React.FC<MaterialItemProps> = ({
   getMaterialColorStyle, 
   getTextColor,
   isMobile 
-}) => {
+}: MaterialItemProps) => {
   // ホバー状態を管理するstate
   const [isHovered, setIsHovered] = useState(false);
 
@@ -399,6 +399,25 @@ function MaterialsContent() {
       '黄茶色': '#cd853f',
       '薄黄色': '#f0e68c',
       '濃茶色': '#654321',
+      // 英語の色名も追加
+      'White': '#f8f9fa',
+      'Beige': '#f5f5dc',
+      'Gray': '#808080',
+      'Grey': '#808080',
+      'Blue': '#1e90ff',
+      'Green': '#2e8b57',
+      'Yellow': '#ffeb3b',
+      'Pink': '#ffb6c1',
+      'Brown': '#8b4513',
+      'Black': '#333333',
+      'Transparent': '#ffffff',
+      'Light Brown': '#d2b48c',
+      'Oak': '#d2b48c',
+      'Walnut': '#654321',
+      'Dark Gray': '#444444',
+      'Blue Marble': '#4169e1',
+      'Black Marble': '#333333',
+      'White Marble': '#f0f0f0',
     };
     
     return colorMap[color] || '#cccccc';
@@ -406,7 +425,10 @@ function MaterialsContent() {
 
   // テキスト色を判定（背景色に基づく）
   const getTextColor = (color: string) => {
-    const lightColors = ['白色', 'ベージュ', '半透明', '透明', '薄黄色', '黄色'];
+    const lightColors = [
+      '白色', 'ベージュ', '半透明', '透明', '薄黄色', '黄色',
+      'White', 'Beige', 'Yellow', 'Transparent', 'White Marble'
+    ];
     return lightColors.includes(color) ? 'text-gray-700' : 'text-white';
   };
 
