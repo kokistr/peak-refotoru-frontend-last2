@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { Slider } from '@/components/ui/slider';
 import { useImageContext } from '@/lib/image-context';
 import { useRouter } from 'next/navigation';
-import { apiClient } from '@/lib/api-client'; // 追加
 
 export default function CategoryPage() {
   const [selectedCategory, setSelectedCategory] = useState('壁');
@@ -648,8 +647,28 @@ export default function CategoryPage() {
       console.log(`APIリクエスト送信: image_id=${uploadedImageMeta.id}, mask_data長さ=${base64Data.length}`);
 
       // APIにリクエストを送信
-      const data = await apiClient.processMask(uploadedImageMeta.id, base64Data);
+      const response = await fetch('https://tech0-gen-8-step4-peak-back-gxcchbcwfaxguem.canadacentral-01.azurewebsites.net/api/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image_id: uploadedImageMeta.id,
+          mask_data: base64Data
+        }),
+      });
 
+      // レスポンスステータスを確認
+      console.log("APIレスポンスステータス:", response.status);
+      
+      if (!response.ok) {
+        // エラーレスポンスのテキストを取得
+        const errorText = await response.text();
+        console.error("サーバーエラー:", errorText);
+        throw new Error(errorText || '範囲選択の保存に失敗しました');
+      }
+
+      const data = await response.json();
       console.log("マスク保存成功:", data);
 
       // マスク情報をコンテキストに保存
