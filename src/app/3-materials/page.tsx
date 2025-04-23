@@ -7,6 +7,74 @@ import { useSearchParams } from 'next/navigation';
 import { useImageContext } from '@/lib/image-context';
 import { useRouter } from 'next/navigation';
 
+// 素材アイテムコンポーネント
+const MaterialItem = ({ 
+  material, 
+  isSelected, 
+  onClick, 
+  getFullImageUrl, 
+  getMaterialColorStyle, 
+  getTextColor,
+  isMobile 
+}) => {
+  // ホバー状態を管理するstate
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div
+      key={material.id}
+      className={`material-item ${isSelected ? 'selected' : ''}`}
+      onClick={() => onClick(String(material.id))}
+      // マウスイベントハンドラを追加
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      // タッチデバイス用（一時的に情報を表示）
+      onTouchStart={() => setIsHovered(true)}
+      onTouchEnd={() => setTimeout(() => setIsHovered(false), 1000)} // タッチ後1秒間表示
+    >
+      <div className="relative">
+        {material.image ? (
+          <div className={`${isMobile ? 'h-16' : 'h-20'} overflow-hidden`}>
+            <Image
+              src={getFullImageUrl(material.image)}
+              alt={material.name}
+              width={150}
+              height={120}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                console.error(`画像ロードエラー: ${material.image}`);
+                // エラー発生時にフォールバック表示に切り替える
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          </div>
+        ) : (  
+          <div 
+            className={`${isMobile ? 'h-16' : 'h-20'} flex items-center justify-center`}
+            style={{ 
+              backgroundColor: getMaterialColorStyle(material.color)
+            }}
+          >
+            <span className={`${getTextColor(material.color)} text-center px-2 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+              {material.name}
+            </span>
+          </div>
+        )}
+        
+        {/* ホバー時に表示される製品名 */}
+        {isHovered && (
+          <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center transition-opacity duration-200 opacity-100">
+            <div className="text-white text-center px-2">
+              <div className="font-medium text-sm">{material.name}</div>
+              {material.color && <div className="text-xs opacity-80">{material.color}</div>}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // MaterialsContent コンポーネント
 function MaterialsContent() {  
   const searchParams = useSearchParams();
@@ -507,40 +575,18 @@ function MaterialsContent() {
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
                   >
+                    {/* 素材アイテムコンポーネントを使用 */}
                     {currentMaterials.map((material) => (
-                      <div
+                      <MaterialItem
                         key={material.id}
-                        className={`material-item ${selectedMaterial === material.id ? 'selected' : ''}`}
-                        onClick={() => handleMaterialClick(String(material.id))}
-                      >
-                        {material.image ? (
-                          <div className={`${isMobile ? 'h-16' : 'h-20'} overflow-hidden`}>
-                            <Image
-                              src={getFullImageUrl(material.image)}
-                              alt={material.name}
-                              width={150}
-                              height={120}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                console.error(`画像ロードエラー: ${material.image}`);
-                                // オプション: エラー発生時にフォールバック表示に切り替える
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          </div>
-                        ) : (  
-                          <div 
-                            className={`${isMobile ? 'h-16' : 'h-20'} flex items-center justify-center`}
-                            style={{ 
-                              backgroundColor: getMaterialColorStyle(material.color)
-                            }}
-                          >
-                            <span className={`${getTextColor(material.color)} text-center px-2 ${isMobile ? 'text-xs' : 'text-sm'}`}>
-                              {material.name}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                        material={material}
+                        isSelected={selectedMaterial === material.id}
+                        onClick={handleMaterialClick}
+                        getFullImageUrl={getFullImageUrl}
+                        getMaterialColorStyle={getMaterialColorStyle}
+                        getTextColor={getTextColor}
+                        isMobile={isMobile}
+                      />
                     ))}
                   </div>
                 )}
