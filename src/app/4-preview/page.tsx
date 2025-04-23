@@ -58,7 +58,7 @@ export default function PreviewPage() {
           });
           
           // Before画像の取得 - IDはそのまま使用（拡張子を含む）
-          const beforeRes = await fetch(`https://tech0-gen-8-step4-peak-back-gxcchbcwfaxguem.canadacentral-01.azurewebsites.net/api/preview/before/${encodeURIComponent(uploadedImageMeta.id)}`);
+          const beforeRes = await fetch(`https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net/api/preview/before/${encodeURIComponent(uploadedImageMeta.id)}`);
           
           if (!beforeRes.ok) {
             const errorData = await beforeRes.json().catch(() => ({ detail: '不明なエラー' }));
@@ -70,7 +70,7 @@ export default function PreviewPage() {
           
           // After画像の取得 - IDはそのまま使用（拡張子を含む）
           const afterRes = await fetch(
-            `https://tech0-gen-8-step4-peak-back-gxcchbcwfaxguem.canadacentral-01.azurewebsites.net/api/preview/after/${encodeURIComponent(uploadedImageMeta.id)}/${encodeURIComponent(categoryImageMeta.mask_id)}`
+            `https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net/api/preview/after/${encodeURIComponent(uploadedImageMeta.id)}/${encodeURIComponent(categoryImageMeta.mask_id)}`
           );
           
           if (!afterRes.ok) {
@@ -165,7 +165,7 @@ export default function PreviewPage() {
     
     // 相対パスの場合は、ベースURLを付与（ローカル開発ではhttp://localhost:8000）
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    return `https://tech0-gen-8-step4-peak-back-gxcchbcwfaxguem.canadacentral-01.azurewebsites.net${normalizedPath}`;
+    return `https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net${normalizedPath}`;
   };
 
 
