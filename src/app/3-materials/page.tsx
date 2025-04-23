@@ -442,8 +442,8 @@ function MaterialsContent() {
 
   return (
     <div className="min-h-screen bg-[#fff9f0]">
-{/* ヘッダー */}
-<header className="fixed top-0 left-0 right-0 z-50 p-4 flex justify-between items-center bg-white shadow-sm">
+      {/* ヘッダー */}
+      <header className="fixed top-0 left-0 right-0 z-50 p-4 flex justify-between items-center bg-white shadow-sm">
         <Link href="/" className="flex items-center">
           <Image 
             src="/images/logo.png" 
