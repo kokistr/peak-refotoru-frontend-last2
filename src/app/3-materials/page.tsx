@@ -97,10 +97,17 @@ function MaterialsContent() {
       console.log(`素材取得を開始: カテゴリ=${categoryParam}`);
       
       try {
+        // CORSエラーを解消するために credentials: 'omit' に変更
         const response = await fetch(`https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net/api/materials/${encodedCategory}`, {
-          credentials: 'include',
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          // credentials: 'include' から 'omit' に変更
+          credentials: 'omit',
           mode: 'cors',
-          cache: 'no-cache'
+          cache: 'no-store' // キャッシュの問題を防ぐ
         });
         console.log(`APIレスポンスステータス: ${response.status}`);
         
@@ -116,7 +123,7 @@ function MaterialsContent() {
         setMaterialItems(data.materials);
       } catch (err) {
         console.error('素材取得エラー:', err);
-        setError('素材の読み込み中にエラーが発生しました。');
+        setError('素材の読み込み中にエラーが発生しました。ページを再読み込みしてください。');
       } finally {
         setIsLoading(false);
         console.log('素材取得処理完了');
@@ -154,58 +161,6 @@ function MaterialsContent() {
     const img = e.currentTarget;
     setImageHeight(img.clientHeight);
   };
-
-  // // カテゴリー別の素材データ（実際の実装ではAPIから取得するので変更！）
-  // const materials = {
-  //   壁: [
-  //     { id: 1, name: 'ホワイトペイント', color: '白色' },
-  //     { id: 2, name: 'ベージュクロス', color: 'ベージュ' },
-  //     { id: 3, name: 'グレーペイント', color: 'グレー' },
-  //     { id: 4, name: 'ブルーペイント', color: '青色' },
-  //     { id: 5, name: 'グリーンペイント', color: '緑色' },
-  //     { id: 6, name: 'イエローペイント', color: '黄色' },
-  //     { id: 7, name: 'ピンククロス', color: 'ピンク' },
-  //     { id: 8, name: '木目調クロス', color: '茶色' },
-  //     { id: 9, name: 'モルタル調', color: 'グレー' },
-  //   ],
-  //   床: [
-  //     {
-  //       id: 1,
-  //       name: 'オーク柄フローリング',
-  //       color: 'ベージュ',
-  //       image: '/images/FL-MD-BE-016.jpg',
-  //     },
-  //     {
-  //       id: 2,
-  //       name: '大理石調ブラックフローリング',
-  //       color: '黒色',
-  //       image: '/images/FL-MD-BKM-013.jpg',
-  //     },
-  //     {
-  //       id: 3,
-  //       name: 'グレーアッシュ柄フローリング',
-  //       color: 'グレー',
-  //       image: '/images/FL-CR-WH-011.jpg',
-  //     },
-  //     { id: 4, name: 'バーチ', color: '明るい茶色' },
-  //     { id: 5, name: 'メープル', color: '黄茶色' },
-  //     { id: 6, name: '竹フローリング', color: '薄黄色' },
-  //     { id: 7, name: 'コルク', color: '茶色' },
-  //     { id: 8, name: 'タイル', color: 'グレー' },
-  //     { id: 9, name: 'カーペット', color: 'ベージュ' },
-  //   ],
-  //   ドア: [
-  //     { id: 1, name: 'ホワイトドア', color: '白色' },
-  //     { id: 2, name: 'ナチュラルウッド', color: '薄茶色' },
-  //     { id: 3, name: 'ダークウッド', color: '濃茶色' },
-  //     { id: 4, name: 'ガラスドア', color: '透明' },
-  //     { id: 5, name: 'フロストガラス', color: '半透明' },
-  //     { id: 6, name: '黒塗装ドア', color: '黒色' },
-  //     { id: 7, name: 'グレードア', color: 'グレー' },
-  //     { id: 8, name: 'ブルードア', color: '青色' },
-  //     { id: 9, name: 'グリーンドア', color: '緑色' },
-  //   ],
-  // };
 
   // 安全にアクセスするためのヘルパー関数
   const getMaterialsForCategory = () => {
@@ -252,19 +207,22 @@ function MaterialsContent() {
         material_id: id
       });
       
+      // CORSエラーを解消するために credentials: 'omit' に変更
       const response = await fetch('https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net/api/apply-material', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           image_id: uploadedImageMeta.id,
           mask_id: categoryImageMeta.mask_id,
           material_id: id
         }),
-        credentials: 'include',
+        // credentials: 'include' から 'omit' に変更
+        credentials: 'omit',
         mode: 'cors',
-        cache: 'no-cache'
+        cache: 'no-store'
       });
       
       if (!response.ok) {
@@ -286,7 +244,9 @@ function MaterialsContent() {
       
     } catch (error) {
       console.error('素材適用エラー:', error);
-
+      // エラーの場合でもユーザーに通知
+      setError('素材の適用に失敗しました。再度お試しください。');
+      setTimeout(() => setError(null), 3000);
     } finally {
       setIsApplying(false); // ローディング終了
     }
@@ -362,6 +322,14 @@ function MaterialsContent() {
   const getTextColor = (color: string) => {
     const lightColors = ['白色', 'ベージュ', '半透明', '透明', '薄黄色', '黄色'];
     return lightColors.includes(color) ? 'text-gray-700' : 'text-white';
+  };
+
+  // APIリクエスト失敗時のリトライ機能
+  const retryFetchMaterials = () => {
+    setError(null);
+    setIsLoading(true);
+    // カテゴリを再設定してuseEffectを再実行
+    setSelectedCategory(prevCategory => prevCategory);
   };
 
   return (
@@ -519,7 +487,15 @@ function MaterialsContent() {
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#f87e42]"></div>
                   </div>
                 ) : error ? (
-                  <div className="text-red-500 text-center p-4">{error}</div>
+                  <div className="text-red-500 text-center p-4">
+                    {error}
+                    <button 
+                      onClick={retryFetchMaterials}
+                      className="block mx-auto mt-2 bg-[#f87e42] text-white px-3 py-1 rounded-md hover:bg-[#e06932]"
+                    >
+                      再読込
+                    </button>
+                  </div>
                 ) : materialItems.length === 0 ? (
                   <div className="text-gray-500 text-center p-4">
                     このカテゴリの素材はありません
@@ -746,8 +722,8 @@ function MaterialsContent() {
           }
         }
       `}</style>
-            {/* フッターをインラインで追加 */}
-            <footer className="bg-black text-white py-4 mt-8 w-full">
+      {/* フッターをインラインで追加 */}
+      <footer className="bg-black text-white py-4 mt-8 w-full">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-6 mb-2 text-sm">
             <a href="https://forest.toppan.com/refotoru/terms/" className="hover:underline">利用規約</a>
@@ -774,7 +750,7 @@ function MaterialsContent() {
           </div>
         </div>
       </footer>
-      </div>
+    </div>
   );
 }
 
