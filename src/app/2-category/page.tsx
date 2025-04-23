@@ -647,7 +647,7 @@ export default function CategoryPage() {
       console.log(`APIリクエスト送信: image_id=${uploadedImageMeta.id}, mask_data長さ=${base64Data.length}`);
 
       // APIにリクエストを送信
-      const response = await fetch('https://tech0-gen-8-step4-peak-back-gxcchbcwfaxguem.canadacentral-01.azurewebsites.net/api/process', {
+      const response = await fetch('https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net/api/process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
