@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
-// image-contextのインポートを削除（使用していないため）
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -20,6 +19,23 @@ export default function Home() {
   const [styleImagesError, setStyleImagesError] = useState<boolean[]>([
     false, false, false, false
   ]);
+
+  // コンポーネントマウント時にスクロールを有効化する効果
+  useEffect(() => {
+    // body要素のスタイルを確保
+    document.body.style.overflow = 'auto';
+    document.body.style.height = 'auto';
+    document.documentElement.style.overflow = 'auto';
+    document.documentElement.style.height = 'auto';
+    
+    return () => {
+      // コンポーネントのアンマウント時にリセット
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.height = '';
+    };
+  }, []);
 
   const handleImageError = (imageName: string) => {
     setImageError(prev => ({
@@ -105,10 +121,10 @@ export default function Home() {
           </nav>
         )}
       </header>
-      <main className="container mx-auto px-4 py-6 pt-24"></main>
 
-      {/* メインコンテンツ */}
-      <main className="container mx-auto px-4 py-6">
+      {/* メインコンテンツ - paddingとmarginを調整 */}
+      <div className="pt-24 pb-4"></div> {/* ヘッダー下のスペース確保 */}
+      <main className="container mx-auto px-4 py-2">
         <div className="max-w-4xl mx-auto">
           {/* タイトルセクション */}
           <div className="text-center mb-4">
@@ -356,6 +372,16 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* グローバルスタイル */}
+      <style jsx global>{`
+        html, body {
+          overflow: auto !important;
+          height: auto !important;
+          position: relative;
+          overscroll-behavior: auto;
+        }
+      `}</style>
     </div>
   );
 }
