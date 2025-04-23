@@ -141,7 +141,7 @@ function MaterialsContent() {
     }
     
     // 相対パスの場合はベースURLを追加
-    return `https://tech0-gen-8-step4-peak-back-gxcchbcwfaxguem.canadacentral-01.azurewebsites.net${imageUrl}`;
+    return `https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net${imageUrl}`;
   };
 
 
@@ -248,7 +248,7 @@ function MaterialsContent() {
         material_id: id
       });
       
-      const response = await fetch('https://tech0-gen-8-step4-peak-back-gxcchbcwfaxguem.canadacentral-01.azurewebsites.net/api/apply-material', {
+      const response = await fetch('https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net/api/apply-material', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -273,7 +273,7 @@ function MaterialsContent() {
       // ※ここが重要0422
       if (data.public_url) {
         // 合成画像のURLを使用して表示を更新
-        const fullImageUrl = `https://tech0-gen-8-step4-peak-back-gxcchbcwfaxguem.canadacentral-01.azurewebsites.net${data.public_url}`;
+        const fullImageUrl = `https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net${data.public_url}`;
         setCategoryImage(fullImageUrl, categoryImageMeta);
       }
       
