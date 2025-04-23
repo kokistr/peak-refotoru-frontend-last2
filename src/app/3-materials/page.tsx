@@ -97,7 +97,11 @@ function MaterialsContent() {
       console.log(`素材取得を開始: カテゴリ=${categoryParam}`);
       
       try {
-        const response = await fetch(`/api/materials/${encodedCategory}`);
+        const response = await fetch(`https://tech0-gen-8-step4-peak-back-gxcchbcwafaxguem.canadacentral-01.azurewebsites.net/api/materials/${encodedCategory}`, {
+          credentials: 'include',
+          mode: 'cors',
+          cache: 'no-cache'
+        });
         console.log(`APIレスポンスステータス: ${response.status}`);
         
         if (!response.ok) {
@@ -258,6 +262,9 @@ function MaterialsContent() {
           mask_id: categoryImageMeta.mask_id,
           material_id: id
         }),
+        credentials: 'include',
+        mode: 'cors',
+        cache: 'no-cache'
       });
       
       if (!response.ok) {
