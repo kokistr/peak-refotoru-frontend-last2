@@ -4,7 +4,7 @@ import { useState, useRef, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useImageContext } from '../../lib/image-context';
+import { useImageContext } from '@/lib/image-context'; // パスを修正
 
 export default function UploadPage() {
   const router = useRouter();
@@ -14,7 +14,7 @@ export default function UploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   // ファイルの先頭部分で logoError 状態を追加
-const [logoError, setLogoError] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -88,7 +88,7 @@ const [logoError, setLogoError] = useState(false);
   };
 
   return (
-    <div className="min-h-screen bg-[#fff9f0]">
+    <div className="min-h-screen bg-[#fff9f0] overflow-auto">
       {/* ヘッダー */}
       <header className="fixed top-0 left-0 right-0 z-50 p-4 flex justify-between items-center bg-white shadow-sm">
         <Link href="/" className="flex items-center">
