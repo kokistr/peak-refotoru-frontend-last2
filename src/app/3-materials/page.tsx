@@ -7,8 +7,29 @@ import { useSearchParams } from 'next/navigation';
 import { useImageContext } from '@/lib/image-context';
 import { useRouter } from 'next/navigation';
 
+// 素材データの型定義
+interface MaterialItem {
+  id: string;
+  product_id: string; // 製品ID
+  name: string;
+  color: string;
+  price?: string | number;
+  image?: string;
+}
+
+// MaterialItemコンポーネントのProps型定義
+interface MaterialItemProps {
+  material: MaterialItem;
+  isSelected: boolean;
+  onClick: (id: string) => void;
+  getFullImageUrl: (url: string) => string;
+  getMaterialColorStyle: (color: string) => string;
+  getTextColor: (color: string) => string;
+  isMobile: boolean;
+}
+
 // 素材アイテムコンポーネント
-const MaterialItem = ({ 
+const MaterialItem: React.FC<MaterialItemProps> = ({ 
   material, 
   isSelected, 
   onClick, 
@@ -22,7 +43,6 @@ const MaterialItem = ({
 
   return (
     <div
-      key={material.id}
       className={`material-item ${isSelected ? 'selected' : ''}`}
       onClick={() => onClick(String(material.id))}
       // マウスイベントハンドラを追加
@@ -61,11 +81,12 @@ const MaterialItem = ({
           </div>
         )}
         
-        {/* ホバー時に表示される製品名 */}
+        {/* ホバー時に表示される製品ID */}
         {isHovered && (
           <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center transition-opacity duration-200 opacity-100">
             <div className="text-white text-center px-2">
-              <div className="font-medium text-sm">{material.name}</div>
+              <div className="font-medium text-sm">製品ID: {material.product_id}</div>
+              <div className="text-xs opacity-80">{material.name}</div>
               {material.color && <div className="text-xs opacity-80">{material.color}</div>}
             </div>
           </div>
@@ -82,7 +103,6 @@ function MaterialsContent() {
 
   const [selectedCategory, setSelectedCategory] = useState('壁');
   const [currentPage, setCurrentPage] = useState(0);
-  //const [selectedMaterial, setSelectedMaterial] = useState<number | null>(null);
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
   const [showMaterialInfo, setShowMaterialInfo] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -90,12 +110,11 @@ function MaterialsContent() {
   const [imageHeight, setImageHeight] = useState(0); // 画像の高さを追跡
   const materialsContainerRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
-  // const { categoryImage, setMaterialImage } = useImageContext(); // これ削除する必要あるかも0422　
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [materialItems, setMaterialItems] = useState<any[]>([]);
+  const [materialItems, setMaterialItems] = useState<MaterialItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { 
     uploadedImage, 
@@ -103,8 +122,8 @@ function MaterialsContent() {
     categoryImage, 
     categoryImageMeta,
     setCategoryImage 
-  } = useImageContext(); // 追加した0422
-  const [isApplying, setIsApplying] = useState(false); // 追加した0422
+  } = useImageContext();
+  const [isApplying, setIsApplying] = useState(false);
 
 
   useEffect(() => {
@@ -147,7 +166,7 @@ function MaterialsContent() {
     return categoryMap[japaneseCategory] || japaneseCategory;
   };
 
-  // APIから素材を取得0422
+  // APIから素材を取得
   useEffect(() => {
     const fetchMaterials = async () => {
       if (!categoryParam) return;
@@ -201,7 +220,7 @@ function MaterialsContent() {
     fetchMaterials();
   }, [categoryParam]); // カテゴリが変更されたときに再取得
 
-  // 素材データ表示のデバック用0422
+  // 素材データ表示のデバック用
   useEffect(() => {
     if (materialItems.length > 0) {
       console.log('Material items:', materialItems);
@@ -210,7 +229,7 @@ function MaterialsContent() {
   }, [materialItems]);
 
   
-  // 素材データURLを整形0422
+  // 素材データURLを整形
   const getFullImageUrl = (imageUrl: string) => {
     if (!imageUrl) return '';
     
@@ -303,7 +322,6 @@ function MaterialsContent() {
       console.log('素材適用成功:', data);
       
       // APIから返された合成画像URLを使って表示を更新
-      // ※ここが重要0422
       if (data.public_url) {
         // 合成画像のURLを使用して表示を更新
         const fullImageUrl = getFullImageUrl(data.public_url);
@@ -539,7 +557,6 @@ function MaterialsContent() {
                 )}
                 
                 {/* 選択中の素材情報表示 */}
-
                 {selectedMaterial && showMaterialInfo && (
                   <div className="absolute bottom-3 left-3 bg-black bg-opacity-70 text-white px-4 py-2 rounded-md text-base">
                     {getMaterialsForCategory().find((m) => m.id === selectedMaterial)?.name}
